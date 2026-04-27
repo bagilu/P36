@@ -1,15 +1,88 @@
 
-body{font-family:Arial,sans-serif;background:#081b1b;color:#fff;text-align:center}
-.topbar{display:flex;gap:30px;justify-content:center;align-items:center;padding:20px}
-.board{display:grid;grid-template-columns:1fr 2fr 1fr;height:70vh}
-.panel{padding-top:100px}
-button{display:block;margin:20px auto;padding:20px 30px;font-size:28px;border-radius:16px}
-.left button:first-of-type{background:#d33;color:#fff}
-.left button:last-of-type{background:#666;color:#fff}
-.right button:first-of-type{background:#2d7ef7;color:#fff}
-.right button:last-of-type{background:#f59e0b;color:#fff}
-#fallingBox{
-margin:80px auto;width:70%;min-height:120px;background:#123;border:3px solid #66ffcc;
-display:flex;align-items:center;justify-content:center;font-size:34px;padding:30px;border-radius:24px
+body {
+  margin: 0;
+  background: #07191d;
+  color: white;
+  font-family: Arial, "Noto Sans TC", sans-serif;
+  overflow: hidden;
 }
-#status{font-size:28px;margin-top:30px}
+
+.hud {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 16px;
+  font-size: 28px;
+  align-items: center;
+}
+
+.hud button {
+  font-size: 24px;
+  padding: 12px 24px;
+  border-radius: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 2.4fr 1fr;
+  height: calc(100vh - 80px);
+}
+
+.side {
+  padding-top: 120px;
+  text-align: center;
+}
+
+.side h2 {
+  font-size: 34px;
+}
+
+.side button {
+  font-size: 30px;
+  padding: 22px 28px;
+  border-radius: 18px;
+  margin: 24px auto;
+  display: block;
+  width: 70%;
+  min-height: 90px;
+  color: white;
+  border: 0;
+}
+
+.side:first-child button:nth-of-type(1) {
+  background: #d33;
+}
+
+.side:first-child button:nth-of-type(2) {
+  background: #666;
+}
+
+.side:last-child button:nth-of-type(1) {
+  background: #2d7ef7;
+}
+
+.side:last-child button:nth-of-type(2) {
+  background: #f59e0b;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+canvas {
+  background: #0d2730;
+  border: 3px solid #66ffcc;
+  border-radius: 16px;
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 130px);
+}
+
+.legend {
+  text-align: center;
+  padding: 10px;
+  font-size: 24px;
+  color: #8ef;
+}

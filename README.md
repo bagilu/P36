@@ -1,13 +1,12 @@
-# P36 商情雷達系統 Starter ZIP
+# P36 Arcade v2.1 Fixed View
 
-內容：
-- p36_schema.sql : 建表與示範 seed（32題示範，可再擴充）
-- index.html
-- style.css
-- game.js
-- config.example.js
+本版修正：
+- SQL 已補上 ViewP36ActiveSignals
+- DROP 順序改為先 DROP VIEW 再 DROP TABLE
+- 加上索引
+- 保留 Signal Conveyor Canvas 版前端
 
-部署：
-1. SQL 匯入 Supabase
-2. config.example.js 改名 config.js 填入您的專案資訊
-3. 上傳到 GitHub Pages
+使用順序：
+1. 在 Supabase SQL Editor 執行 p36_arcade_schema.sql
+2. 將 config.example.js 改名 config.js 並填入 Supabase 資訊（本版前端仍先用本地題庫）
+3. 上傳 index.html、style.css、game.js 到 GitHub Pages

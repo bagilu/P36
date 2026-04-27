@@ -1,36 +1,35 @@
 <!doctype html>
-<html lang='zh-Hant'>
+<html lang="zh-Hant">
 <head>
-<meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>P36 商情雷達</title>
-<link rel='stylesheet' href='style.css'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P36 商情雷達 Arcade</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="topbar">
-<h1>P36 商情雷達挑戰</h1>
-<div id="timer">60</div>
-<div id="score">Score:0</div>
-<button onclick="startGame()">開始</button>
+<div class="hud">
+  <div>時間 <span id="timer">60</span></div>
+  <div id="score">Score 0</div>
+  <button onclick="startGame()">開始挑戰</button>
 </div>
 
-<div class="board">
-<div class="panel left">
-<h2>玩家A</h2>
-<button onclick="judgeImportance('important')">重要訊號</button>
-<button onclick="judgeImportance('noise')">雜訊</button>
-</div>
+<div class="layout">
+  <div class="side">
+    <h2>玩家A</h2>
+    <button onclick="judgeImportance('important')">重要訊號</button>
+    <button onclick="judgeImportance('noise')">雜訊</button>
+  </div>
 
-<div class="center">
-<div id="fallingBox">按開始</div>
-<div id="status"></div>
-</div>
+  <div class="center">
+    <canvas id="gameCanvas" width="1100" height="760"></canvas>
+    <div class="legend">最下方卡片為 ACTIVE SIGNAL</div>
+  </div>
 
-<div class="panel right">
-<h2>玩家B</h2>
-<button onclick="judgeImpact('opportunity')">商機</button>
-<button onclick="judgeImpact('crisis')">危機</button>
-</div>
+  <div class="side">
+    <h2>玩家B</h2>
+    <button onclick="judgeImpact('opportunity')">商機</button>
+    <button onclick="judgeImpact('crisis')">危機</button>
+  </div>
 </div>
 
 <script src="game.js"></script>
