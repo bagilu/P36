@@ -1,5 +1,5 @@
-// P36 Arcade v2.2 Slow Start Signal Conveyor
-// 調整重點：慢速開場、逐步加壓、最後 Final Rush。
+// P36 Arcade v2.3 Ultra Slow Start Signal Conveyor
+// 調整重點：開場約 10 秒才落到底，約 5 秒出下一題，之後逐步加快。
 // 本版仍先用本地題庫。下一版可改為從 Supabase ViewP36ActiveSignals 讀取。
 
 const bank = [
@@ -24,17 +24,24 @@ let timer = 60;
 let running = false;
 
 // ===== 節奏參數：主要調整這裡 =====
-// 第一段：慢速開場
-const STAGE_1_SPAWN_MS = 1500;
-const STAGE_1_SPEED = 0.08;
+// Canvas 從 y=-70 到 bottomLimit=720，距離約790px。
+// speed=0.079 px/ms 時，約 10 秒到底。
 
-// 第二段：開始有壓力
-const STAGE_2_SPAWN_MS = 1200;
-const STAGE_2_SPEED = 0.14;
+// 第一段：非常從容，讓玩家理解規則
+const STAGE_1_SPAWN_MS = 5000;
+const STAGE_1_SPEED = 0.079;
 
-// 第三段：Final Rush
-const STAGE_3_SPAWN_MS = 900;
-const STAGE_3_SPEED = 0.22;
+// 第二段：開始進入遊戲節奏
+const STAGE_2_SPAWN_MS = 3500;
+const STAGE_2_SPEED = 0.12;
+
+// 第三段：明顯加壓，但仍保留可讀性
+const STAGE_3_SPAWN_MS = 2200;
+const STAGE_3_SPEED = 0.18;
+
+// 最後10秒：Final Rush
+const STAGE_4_SPAWN_MS = 1500;
+const STAGE_4_SPEED = 0.26;
 
 let spawnMs = STAGE_1_SPAWN_MS;
 let speed = STAGE_1_SPEED;
@@ -66,7 +73,6 @@ function startGame() {
   timer = 60;
   running = true;
 
-  // 慢速開場
   spawnMs = STAGE_1_SPAWN_MS;
   speed = STAGE_1_SPEED;
 
@@ -76,7 +82,7 @@ function startGame() {
   lastSpawn = performance.now();
   lastT = performance.now();
 
-  // 一開始先產生一題，不要等1.5秒才看到
+  // 開場立即出第一題
   makeSignal();
 
   requestAnimationFrame(loop);
@@ -90,15 +96,26 @@ function startGame() {
     timer--;
     document.getElementById('timer').innerText = timer;
 
+    // 60-40秒：開場慢速
+    // 40-20秒：中段加速
     if (timer === 40) {
       spawnMs = STAGE_2_SPAWN_MS;
       speed = STAGE_2_SPEED;
+      showStageNotice('STAGE 2 加速期');
     }
 
+    // 20-10秒：後段壓力
     if (timer === 20) {
       spawnMs = STAGE_3_SPAWN_MS;
       speed = STAGE_3_SPEED;
-      showFinalRush();
+      showStageNotice('STAGE 3 高壓期');
+    }
+
+    // 最後10秒：Final Rush
+    if (timer === 10) {
+      spawnMs = STAGE_4_SPAWN_MS;
+      speed = STAGE_4_SPEED;
+      showStageNotice('FINAL RUSH!');
     }
 
     if (timer <= 0) {
@@ -108,10 +125,9 @@ function startGame() {
   }, 1000);
 }
 
-function showFinalRush() {
-  // 簡單提示；後續可改為音效或大型動畫
+function showStageNotice(text) {
   const scoreEl = document.getElementById('score');
-  scoreEl.innerText = 'FINAL RUSH! Score ' + score;
+  scoreEl.innerText = text + '  Score ' + score;
   setTimeout(updateScore, 1200);
 }
 
@@ -253,9 +269,12 @@ function render() {
   // Stage label
   ctx.font = '22px Arial';
   ctx.fillStyle = '#8ef';
+
   let stageText = 'STAGE 1 觀察期';
   if (timer <= 40 && timer > 20) stageText = 'STAGE 2 加速期';
-  if (timer <= 20) stageText = 'FINAL RUSH';
+  if (timer <= 20 && timer > 10) stageText = 'STAGE 3 高壓期';
+  if (timer <= 10) stageText = 'FINAL RUSH';
+
   ctx.fillText(stageText, 40, 40);
 
   const a = activeSignal();
