@@ -1,4 +1,5 @@
-// P36 Arcade v2.1 Signal Conveyor
+// P36 Arcade v2.2 Slow Start Signal Conveyor
+// 調整重點：慢速開場、逐步加壓、最後 Final Rush。
 // 本版仍先用本地題庫。下一版可改為從 Supabase ViewP36ActiveSignals 讀取。
 
 const bank = [
@@ -21,8 +22,22 @@ let signals = [];
 let score = 0;
 let timer = 60;
 let running = false;
-let spawnMs = 1000;
-let speed = 0.45;
+
+// ===== 節奏參數：主要調整這裡 =====
+// 第一段：慢速開場
+const STAGE_1_SPAWN_MS = 1500;
+const STAGE_1_SPEED = 0.08;
+
+// 第二段：開始有壓力
+const STAGE_2_SPAWN_MS = 1200;
+const STAGE_2_SPEED = 0.14;
+
+// 第三段：Final Rush
+const STAGE_3_SPAWN_MS = 900;
+const STAGE_3_SPEED = 0.22;
+
+let spawnMs = STAGE_1_SPAWN_MS;
+let speed = STAGE_1_SPEED;
 let lastSpawn = 0;
 let lastT = 0;
 
@@ -50,12 +65,20 @@ function startGame() {
   score = 0;
   timer = 60;
   running = true;
-  spawnMs = 1000;
-  speed = 0.45;
+
+  // 慢速開場
+  spawnMs = STAGE_1_SPAWN_MS;
+  speed = STAGE_1_SPEED;
+
   document.getElementById('timer').innerText = timer;
   updateScore();
+
   lastSpawn = performance.now();
   lastT = performance.now();
+
+  // 一開始先產生一題，不要等1.5秒才看到
+  makeSignal();
+
   requestAnimationFrame(loop);
 
   const clock = setInterval(() => {
@@ -68,13 +91,14 @@ function startGame() {
     document.getElementById('timer').innerText = timer;
 
     if (timer === 40) {
-      spawnMs = 850;
-      speed = 0.65;
+      spawnMs = STAGE_2_SPAWN_MS;
+      speed = STAGE_2_SPEED;
     }
 
     if (timer === 20) {
-      spawnMs = 650;
-      speed = 0.90;
+      spawnMs = STAGE_3_SPAWN_MS;
+      speed = STAGE_3_SPEED;
+      showFinalRush();
     }
 
     if (timer <= 0) {
@@ -82,6 +106,13 @@ function startGame() {
       clearInterval(clock);
     }
   }, 1000);
+}
+
+function showFinalRush() {
+  // 簡單提示；後續可改為音效或大型動畫
+  const scoreEl = document.getElementById('score');
+  scoreEl.innerText = 'FINAL RUSH! Score ' + score;
+  setTimeout(updateScore, 1200);
 }
 
 function activeSignal() {
@@ -210,6 +241,7 @@ function loop(timestamp) {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Active zone
   ctx.strokeStyle = '#ffee55';
   ctx.lineWidth = 5;
   ctx.strokeRect(120, activeLine, 860, activeHeight);
@@ -217,6 +249,14 @@ function render() {
   ctx.font = '24px Arial';
   ctx.fillStyle = '#ffee55';
   ctx.fillText('ACTIVE SIGNAL ZONE', 430, activeLine - 15);
+
+  // Stage label
+  ctx.font = '22px Arial';
+  ctx.fillStyle = '#8ef';
+  let stageText = 'STAGE 1 觀察期';
+  if (timer <= 40 && timer > 20) stageText = 'STAGE 2 加速期';
+  if (timer <= 20) stageText = 'FINAL RUSH';
+  ctx.fillText(stageText, 40, 40);
 
   const a = activeSignal();
   signals.forEach(s => drawCard(s, s === a));

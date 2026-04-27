@@ -1,12 +1,27 @@
-# P36 Arcade v2.1 Fixed View
+# P36 Arcade v2.2 Slow Start
 
-本版修正：
-- SQL 已補上 ViewP36ActiveSignals
-- DROP 順序改為先 DROP VIEW 再 DROP TABLE
-- 加上索引
-- 保留 Signal Conveyor Canvas 版前端
+本版調整：
+- 開場速度約比 v2.1 慢 5 倍
+- 題目生成頻率改為較從容
+- 60–40 秒：觀察期
+- 40–20 秒：加速期
+- 20–0 秒：Final Rush
+- 主要可調參數集中在 `game.js` 前段：
 
-使用順序：
-1. 在 Supabase SQL Editor 執行 p36_arcade_schema.sql
-2. 將 config.example.js 改名 config.js 並填入 Supabase 資訊（本版前端仍先用本地題庫）
-3. 上傳 index.html、style.css、game.js 到 GitHub Pages
+```js
+const STAGE_1_SPAWN_MS = 1500;
+const STAGE_1_SPEED = 0.08;
+
+const STAGE_2_SPAWN_MS = 1200;
+const STAGE_2_SPEED = 0.14;
+
+const STAGE_3_SPAWN_MS = 900;
+const STAGE_3_SPEED = 0.22;
+```
+
+其他內容：
+- `p36_arcade_schema.sql`：包含 `ViewP36ActiveSignals`
+- `index.html`
+- `style.css`
+- `game.js`
+- `config.example.js`
