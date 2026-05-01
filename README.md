@@ -1,30 +1,22 @@
-# P36 Arcade v2.3 Ultra Slow Start
+# P36 Arcade v2.4 Supabase Questions + Keyboard
 
-本版調整：
-- 開場速度再放慢
-- 一開始約 10 秒才從上方落到底部
-- 一開始約 5 秒才出下一題
-- 後續逐步加快，最後 10 秒進入 Final Rush
+本版重點：
+- 題目改為從 Supabase `ViewP36ActiveSignals` 讀取
+- 若 Supabase 讀取失敗，會使用本地備用題庫
+- 保留鍵盤操作：
+  - S：重要訊號
+  - D：雜訊
+  - K：商機
+  - L：危機
+- 按鈕文字已加入快捷鍵提示
+- 保留 v2.3 的慢速開場節奏
 
-主要參數在 `game.js` 前段：
+使用方式：
+1. 在 Supabase 執行 `p36_arcade_schema.sql`
+2. 將 `config.example.js` 複製為 `config.js`
+3. 填入您的 Supabase URL 與 anon key
+4. 上傳所有檔案到 GitHub Pages
 
-```js
-const STAGE_1_SPAWN_MS = 5000;
-const STAGE_1_SPEED = 0.079;
-
-const STAGE_2_SPAWN_MS = 3500;
-const STAGE_2_SPEED = 0.12;
-
-const STAGE_3_SPAWN_MS = 2200;
-const STAGE_3_SPEED = 0.18;
-
-const STAGE_4_SPAWN_MS = 1500;
-const STAGE_4_SPEED = 0.26;
-```
-
-其他內容：
-- `p36_arcade_schema.sql`：包含 `ViewP36ActiveSignals`
-- `index.html`
-- `style.css`
-- `game.js`
-- `config.example.js`
+注意：
+- `config.js` 需要和 `index.html` 放在同一層。
+- 如果沒有建立 `config.js`，系統仍可跑，但只會使用本地備用題庫。

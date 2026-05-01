@@ -10,11 +10,12 @@
 <div class="hud">
   <div>時間 <span id="timer">60</span></div>
   <div id="score">Score 0</div>
+  <div id="dataStatus">題庫：讀取中</div>
   <button onclick="startGame()">開始挑戰</button>
 </div>
 
 <div class="layout">
-  <div class="side">
+  <div class="side left-side">
     <h2>玩家A</h2>
     <button onclick="judgeImportance('important')">S 重要訊號</button>
     <button onclick="judgeImportance('noise')">D 雜訊</button>
@@ -22,16 +23,18 @@
 
   <div class="center">
     <canvas id="gameCanvas" width="1100" height="760"></canvas>
-    <div class="legend">最下方卡片為 ACTIVE SIGNAL</div>
+    <div class="legend">最下方卡片為 ACTIVE SIGNAL｜鍵盤：S/D/K/L</div>
   </div>
 
-  <div class="side">
+  <div class="side right-side">
     <h2>玩家B</h2>
     <button onclick="judgeImpact('opportunity')">K 商機</button>
     <button onclick="judgeImpact('crisis')">L 危機</button>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

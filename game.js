@@ -1,8 +1,7 @@
-// P36 Arcade v2.3 Ultra Slow Start Signal Conveyor
-// 調整重點：開場約 10 秒才落到底，約 5 秒出下一題，之後逐步加快。
-// 本版仍先用本地題庫。下一版可改為從 Supabase ViewP36ActiveSignals 讀取。
+// P36 Arcade v2.4 Supabase Questions + Keyboard
+// 題目從 Supabase ViewP36ActiveSignals 載入；失敗時使用本地備用題庫。
 
-const bank = [
+let bank = [
   ['競爭品牌降價20%', 'important', 'crisis'],
   ['競爭者退出市場', 'important', 'opportunity'],
   ['回購率下降8%', 'important', 'crisis'],
@@ -15,6 +14,10 @@ const bank = [
   ['新技術替代現有產品', 'important', 'crisis']
 ];
 
+const fallbackBank = [...bank];
+
+let supabaseClient = null;
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -23,11 +26,8 @@ let score = 0;
 let timer = 60;
 let running = false;
 
-// ===== 節奏參數：主要調整這裡 =====
-// Canvas 從 y=-70 到 bottomLimit=720，距離約790px。
-// speed=0.079 px/ms 時，約 10 秒到底。
-
-// 第一段：非常從容，讓玩家理解規則
+// ===== 節奏參數 =====
+// 第一段：約10秒落到底，約5秒出下一題
 const STAGE_1_SPAWN_MS = 5000;
 const STAGE_1_SPEED = 0.079;
 
@@ -35,7 +35,7 @@ const STAGE_1_SPEED = 0.079;
 const STAGE_2_SPAWN_MS = 3500;
 const STAGE_2_SPEED = 0.12;
 
-// 第三段：明顯加壓，但仍保留可讀性
+// 第三段：明顯加壓
 const STAGE_3_SPAWN_MS = 2200;
 const STAGE_3_SPEED = 0.18;
 
@@ -52,7 +52,63 @@ const activeLine = 640;
 const activeHeight = 80;
 const bottomLimit = 720;
 
+function setDataStatus(text) {
+  const el = document.getElementById('dataStatus');
+  if (el) el.innerText = text;
+}
+
+async function loadSignalsFromSupabase() {
+  try {
+    if (
+      typeof supabase === 'undefined' ||
+      typeof SUPABASE_URL === 'undefined' ||
+      typeof SUPABASE_ANON_KEY === 'undefined' ||
+      !SUPABASE_URL ||
+      !SUPABASE_ANON_KEY ||
+      SUPABASE_URL.includes('YOUR-PROJECT')
+    ) {
+      setDataStatus('題庫：本地備用');
+      bank = fallbackBank;
+      return;
+    }
+
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data, error } = await supabaseClient
+      .from('ViewP36ActiveSignals')
+      .select('signal_text, importance_answer, impact_answer')
+      .limit(1000);
+
+    if (error) {
+      console.error('Supabase load error:', error);
+      setDataStatus('題庫：本地備用');
+      bank = fallbackBank;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setDataStatus('題庫：無資料');
+      bank = fallbackBank;
+      return;
+    }
+
+    bank = data.map(row => [
+      row.signal_text,
+      row.importance_answer,
+      row.impact_answer || 'none'
+    ]);
+
+    setDataStatus('題庫：Supabase ' + bank.length + '題');
+  } catch (err) {
+    console.error('Load signals failed:', err);
+    setDataStatus('題庫：本地備用');
+    bank = fallbackBank;
+  }
+}
+
 function makeSignal() {
+  if (!bank || bank.length === 0) bank = fallbackBank;
+
   const q = bank[Math.floor(Math.random() * bank.length)];
   signals.push({
     text: q[0],
@@ -82,9 +138,7 @@ function startGame() {
   lastSpawn = performance.now();
   lastT = performance.now();
 
-  // 開場立即出第一題
   makeSignal();
-
   requestAnimationFrame(loop);
 
   const clock = setInterval(() => {
@@ -96,22 +150,18 @@ function startGame() {
     timer--;
     document.getElementById('timer').innerText = timer;
 
-    // 60-40秒：開場慢速
-    // 40-20秒：中段加速
     if (timer === 40) {
       spawnMs = STAGE_2_SPAWN_MS;
       speed = STAGE_2_SPEED;
       showStageNotice('STAGE 2 加速期');
     }
 
-    // 20-10秒：後段壓力
     if (timer === 20) {
       spawnMs = STAGE_3_SPAWN_MS;
       speed = STAGE_3_SPEED;
       showStageNotice('STAGE 3 高壓期');
     }
 
-    // 最後10秒：Final Rush
     if (timer === 10) {
       spawnMs = STAGE_4_SPAWN_MS;
       speed = STAGE_4_SPEED;
@@ -257,7 +307,6 @@ function loop(timestamp) {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Active zone
   ctx.strokeStyle = '#ffee55';
   ctx.lineWidth = 5;
   ctx.strokeRect(120, activeLine, 860, activeHeight);
@@ -266,7 +315,6 @@ function render() {
   ctx.fillStyle = '#ffee55';
   ctx.fillText('ACTIVE SIGNAL ZONE', 430, activeLine - 15);
 
-  // Stage label
   ctx.font = '22px Arial';
   ctx.fillStyle = '#8ef';
 
@@ -287,25 +335,21 @@ function render() {
   }
 }
 
-render();
-
-
+// 鍵盤操作
 document.addEventListener('keydown', function(event) {
   const key = event.key.toLowerCase();
 
   if (key === 's') {
     judgeImportance('important');
-  }
-
-  if (key === 'd') {
+  } else if (key === 'd') {
     judgeImportance('noise');
-  }
-
-  if (key === 'k') {
+  } else if (key === 'k') {
     judgeImpact('opportunity');
-  }
-
-  if (key === 'l') {
+  } else if (key === 'l') {
     judgeImpact('crisis');
   }
 });
+
+// 初始載入
+render();
+loadSignalsFromSupabase();
