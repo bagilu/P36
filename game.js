@@ -288,3 +288,24 @@ function render() {
 }
 
 render();
+
+
+document.addEventListener('keydown', function(event) {
+  const key = event.key.toLowerCase();
+
+  if (key === 's') {
+    judgeImportance('important');
+  }
+
+  if (key === 'd') {
+    judgeImportance('noise');
+  }
+
+  if (key === 'k') {
+    judgeImpact('opportunity');
+  }
+
+  if (key === 'l') {
+    judgeImpact('crisis');
+  }
+});
